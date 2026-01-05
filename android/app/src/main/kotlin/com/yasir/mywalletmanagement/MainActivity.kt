@@ -1,4 +1,4 @@
-package com.example.my_wallet_management
+package com.yasir.mywalletmanagement
 
 import io.flutter.embedding.android.FlutterActivity
 
