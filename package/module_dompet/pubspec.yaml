@@ -10,11 +10,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  module_core:
+    path: ../module_core
+  flutter_bloc: ^9.1.1
+  bloc: ^9.2.0
+  meta: ^1.17.0
+  json_annotation: ^4.9.0
+  drift: ^2.30.0
+  sqlite3_flutter_libs: ^0.5.41
+  path_provider: ^2.1.5
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  bloc_test: ^10.0.0
+  build_runner: ^2.10.4
+  drift_dev: ^2.30.0
+  json_serializable: ^6.8.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
