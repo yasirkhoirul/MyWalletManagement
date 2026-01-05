@@ -33,6 +33,6 @@ Future<void> init() async{
   locator.registerLazySingleton(() => PostForgotEmail(locator()),);
 
   // Bloc: use factory so consumers get a fresh instance when needed
-  locator.registerFactory<AuthBloc>(() => AuthBloc(locator<PostLogin>(), locator<PostLogout>(), locator<PostSignup>(), locator<ListenAuth>(),locator()));
+  locator.registerLazySingleton<AuthBloc>(() => AuthBloc(locator<PostLogin>(), locator<PostLogout>(), locator<PostSignup>(), locator<ListenAuth>(),locator()));
 
 }
