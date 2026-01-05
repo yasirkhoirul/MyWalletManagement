@@ -8,6 +8,7 @@ import 'package:module_auth/domain/usecase/post_logout.dart';
 import 'package:module_auth/domain/usecase/post_signup.dart';
 import 'package:module_auth/domain/usecase/listen_auth.dart';
 import 'package:module_auth/domain/usecase/post_forgot_email.dart';
+import 'package:module_core/error/custom_exception.dart';
 
 class MockPostLogin extends Mock implements PostLogin {}
 class MockPostLogout extends Mock implements PostLogout {}
@@ -69,6 +70,36 @@ void main() {
     },
     act: (bloc) => bloc.add(AuthOnForgot('test@example.com')),
     expect: () => [isA<AuthLoading>(), isA<AuthOnSendEmail>()],
+  );
+
+  blocTest<AuthBloc, AuthState>(
+    'emits [AuthLoading, AuthFailed] when login fails',
+    build: () {
+      when(() => mockPostLogin.execute(any())).thenThrow(Exception('login failed'));
+      return bloc;
+    },
+    act: (bloc) => bloc.add(AuthOnLogin(User('u', 'p'))),
+    expect: () => [isA<AuthLoading>(), isA<AuthFailed>()],
+  );
+
+  blocTest<AuthBloc, AuthState>(
+    'emits [AuthLoading, AuthFailed] when signup fails',
+    build: () {
+      when(() => mockPostSignup.execute(any())).thenThrow(Exception('signup failed'));
+      return bloc;
+    },
+    act: (bloc) => bloc.add(AuthOnSignUp(User('new', 'p'))),
+    expect: () => [isA<AuthLoading>(), isA<AuthFailed>()],
+  );
+
+  blocTest<AuthBloc, AuthState>(
+    'emits [AuthLoading, AuthFailed] when forgot email fails with CustomFirebaseException',
+    build: () {
+      when(() => mockPostForgotEmail.execute(any())).thenThrow(CustomFirebaseException('no-email'));
+      return bloc;
+    },
+    act: (bloc) => bloc.add(AuthOnForgot('bad@example.com')),
+    expect: () => [isA<AuthLoading>(), isA<AuthFailed>()],
   );
 
   blocTest<AuthBloc, AuthState>(

@@ -2,7 +2,7 @@ import 'package:module_auth/data/datasource/auth_remote_data.dart';
 import 'package:module_auth/data/model/usermodel.dart';
 import 'package:module_auth/domain/entities/user.dart';
 import 'package:module_auth/domain/repository/auth_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebaseuser;
+import 'package:module_auth/domain/entities/auth_user.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteData authRemoteData;
@@ -23,9 +23,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
   
   @override
-  Stream<firebaseuser.User?> onListenAuth() {
-    return authRemoteData.onListenAuth();
+  Stream<AuthUser?> onListenAuth() {
+    return authRemoteData.onListenAuth().map((fbUser) {
+      if (fbUser == null) return null;
+      try {
+        return AuthUser(id: fbUser.uid, email: fbUser.email);
+      } catch (_) {
+        return null;
+      }
+    });
   }
+
   
   @override
   Future<void> onForget(String email) async{
