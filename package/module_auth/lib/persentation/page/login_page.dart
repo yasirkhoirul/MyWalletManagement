@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:module_auth/persentation/bloc/auth_bloc.dart';
 import 'package:module_auth/domain/entities/user.dart' as user;
 
@@ -42,8 +43,9 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(labelText: 'Email'),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Email harus diisi';
+                        }
                         if (!v.contains('@')) return 'Email tidak valid';
                         return null;
                       },
@@ -54,8 +56,9 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: true,
                       decoration: const InputDecoration(labelText: 'Password'),
                       validator: (v) {
-                        if (v == null || v.isEmpty)
+                        if (v == null || v.isEmpty) {
                           return 'Password harus diisi';
+                        }
                         if (v.length < 6) return 'Password minimal 6 karakter';
                         return null;
                       },
@@ -65,8 +68,16 @@ class _LoginPageState extends State<LoginPage> {
                       listener: (context, state) {},
                       builder: (context, state) {
                         return switch (state) {
-                          AuthFailed(message: var message) => Center(
-                            child: Text(message),
+                          AuthFailed(message: var message) => Column(
+                            children: [
+                              Center(child: Text(message)),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<AuthBloc>().add(AuthStarted());
+                                },
+                                child: Text("Coba Lagi"),
+                              ),
+                            ],
                           ),
                           AuthLoading() => Center(
                             child: CircularProgressIndicator(),
@@ -93,6 +104,30 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         };
                       },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Belum Punya Akun?"),
+                        TextButton(
+                          onPressed: () {
+                            context.push('/signup');
+                          },
+                          child: Text("Daftar"),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Lupa Password?"),
+                        TextButton(
+                          onPressed: () {
+                            context.push('/forgetpassword');
+                          },
+                          child: Text("Klik Disini"),
+                        ),
+                      ],
                     ),
                   ],
                 ),

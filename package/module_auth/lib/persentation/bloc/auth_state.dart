@@ -5,6 +5,7 @@ sealed class AuthState {}
 
 final class AuthInitial extends AuthState {}
 final class AuthLoading extends AuthState {}
+final class AuthOnSendEmail extends AuthState {}
 final class AuthSucces extends AuthState {
   final String message;
   AuthSucces(this.message);

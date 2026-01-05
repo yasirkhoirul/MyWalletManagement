@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(routerConfig: MyRouter().getMyrouter());
+    final authBloc = context.read<AuthBloc>();
+    return MaterialApp.router(routerConfig: MyRouter().getMyrouter(authBloc));
   }
 }

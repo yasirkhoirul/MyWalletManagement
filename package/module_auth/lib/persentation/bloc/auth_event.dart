@@ -14,4 +14,12 @@ class AuthOnSignUp extends AuthEvent{
   final User data;
   AuthOnSignUp(this.data);
 }
+class AuthOnCheck extends AuthEvent{
+  final bool isLogged;
+  AuthOnCheck(this.isLogged);
+}
+class AuthOnForgot extends AuthEvent{
+  final String email;
+  AuthOnForgot(this.email);
+}
 class AuthOnLogout extends AuthEvent{}
