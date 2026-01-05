@@ -2,7 +2,7 @@ name: module_auth
 description: "A new Flutter package project."
 version: 0.0.1
 homepage:
-
+publish_to: none
 environment:
   sdk: ^3.10.0
   flutter: ">=1.17.0"
@@ -10,11 +10,24 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  module_core:
+    path: ../module_core
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+  flutter_secure_storage: ^9.0.0
+  firebase_auth: ^6.1.3
+  json_annotation: ^4.9.0
+  bloc: ^9.2.0
+  meta: ^1.17.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  build_runner: ^2.10.4
+  json_serializable: ^6.8.0
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
