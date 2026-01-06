@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart'
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
-/// Example:
+/// yasir:
 /// ```dart
 /// import 'firebase_options.dart';
 /// // ...
@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '453679320478',
     projectId: 'mywalletmanagement-b589a',
     storageBucket: 'mywalletmanagement-b589a.firebasestorage.app',
-    iosBundleId: 'com.example.myWalletManagement',
+    iosBundleId: 'com.yasir.myWalletManagement',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '453679320478',
     projectId: 'mywalletmanagement-b589a',
     storageBucket: 'mywalletmanagement-b589a.firebasestorage.app',
-    iosBundleId: 'com.example.myWalletManagement',
+    iosBundleId: 'com.yasir.myWalletManagement',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

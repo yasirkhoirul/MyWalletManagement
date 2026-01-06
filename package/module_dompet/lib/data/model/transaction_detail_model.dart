@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:module_core/constant/constant.dart';
+import 'package:module_dompet/domain/entities/transaction_entity.dart';
 import 'tempat_model.dart';
 
 part 'transaction_detail_model.g.dart';
@@ -36,6 +37,30 @@ class TransactionDetailModel {
     final tx = TransactionDetailModel.fromJson(txJson);
     return tx.copyWith(place: tempat);
   }
+
+  TransactionEntity toEntity() => TransactionEntity(
+    id: id,
+    amount: amount,
+    tanggal: tanggal,
+    isUpload: isUpload,
+    type: type,
+    receiptImagePath: receiptImagePath,
+    voiceNotePath: voiceNotePath,
+    place: place?.toEntity(),
+    dompetmonthid: dompetmonthid,
+  );
+
+  factory TransactionDetailModel.fromEntity(TransactionEntity entity) => TransactionDetailModel(
+    id: entity.id,
+    amount: entity.amount,
+    tanggal: entity.tanggal,
+    isUpload: entity.isUpload,
+    type: entity.type,
+    receiptImagePath: entity.receiptImagePath,
+    voiceNotePath: entity.voiceNotePath,
+    place: entity.place == null ? null : TempatModel.fromEntity(entity.place!),
+    dompetmonthid: entity.dompetmonthid,
+  );
 
   TransactionDetailModel copyWith({TempatModel? place}) => TransactionDetailModel(
     id: id,

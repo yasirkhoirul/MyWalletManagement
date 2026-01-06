@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:module_core/constant/constant.dart';
+import 'package:module_dompet/domain/entities/transaction_entity.dart';
 
 part 'transaction_model.g.dart';
 
@@ -29,4 +30,28 @@ class TransactionModel {
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) => _$TransactionModelFromJson(json);
   Map<String, dynamic> toJson() => _$TransactionModelToJson(this);
+
+  TransactionEntity toEntity() => TransactionEntity(
+    id: id,
+    amount: amount,
+    tanggal: tanggal,
+    isUpload: isUpload,
+    type: type,
+    receiptImagePath: receiptImagePath,
+    voiceNotePath: voiceNotePath,
+    place: null, // Place info not in this model; use TransactionDetailModel for full details
+    dompetmonthid: dompetmonthid,
+  );
+
+  factory TransactionModel.fromEntity(TransactionEntity entity) => TransactionModel(
+    id: entity.id,
+    amount: entity.amount,
+    tanggal: entity.tanggal,
+    isUpload: entity.isUpload,
+    type: entity.type,
+    receiptImagePath: entity.receiptImagePath,
+    voiceNotePath: entity.voiceNotePath,
+    place: null,
+    dompetmonthid: entity.dompetmonthid,
+  );
 }

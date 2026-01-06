@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:module_dompet/domain/entities/tempat_entity.dart';
 
 part 'tempat_model.g.dart';
 
@@ -23,14 +24,21 @@ class TempatModel {
   factory TempatModel.fromJson(Map<String, dynamic> json) => _$TempatModelFromJson(json);
   Map<String, dynamic> toJson() => _$TempatModelToJson(this);
 
-  // Convenience: create from a Drift generated data class if needed
-  // (e.g., if you have a `TempatData` class after codegen)
-  // factory TempatModel.fromData(TempatData d) => TempatModel(
-  //   id: d.id,
-  //   lat: d.lat,
-  //   lng: d.lng,
-  //   countryCode: d.countryCode,
-  //   areaCode: d.areaCode,
-  //   areaSource: d.areaSource,
-  // );
+  TempatEntity toEntity() => TempatEntity(
+    id: id,
+    lat: lat,
+    lng: lng,
+    countryCode: countryCode,
+    areaCode: areaCode,
+    areaSource: areaSource,
+  );
+
+  factory TempatModel.fromEntity(TempatEntity entity) => TempatModel(
+    id: entity.id,
+    lat: entity.lat,
+    lng: entity.lng,
+    countryCode: entity.countryCode,
+    areaCode: entity.areaCode,
+    areaSource: entity.areaSource,
+  );
 }

@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:module_auth/module_auth.dart';
 import 'package:module_auth/persentation/bloc/auth_bloc.dart';
 import 'package:module_core/widget/main_scaffold.dart';
+import 'package:module_dompet/persentation/page/dompet_month_page.dart';
 import 'package:module_dompet/persentation/page/history_page.dart';
 import 'package:module_dompet/persentation/page/overview_page.dart';
 import 'package:module_dompet/persentation/page/transaction_page.dart';
@@ -41,6 +42,14 @@ class MyRouter {
               routes: [
                 GoRoute(
                   path: '/history',
+                  builder: (context, state) => DompetMonthPage(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/setting',
                   builder: (context, state) => HistoryPage(),
                 ),
               ],
@@ -49,7 +58,6 @@ class MyRouter {
         ),
       ],
       redirect: (context, state) {
-        Logger().d("state saat ini adalah ${authbloc.state} dan go router path saat ini adlaah ${state.fullPath}");
         final bool isLogin = authbloc.state is AuthSucces;
         final unsecurepath = ['/', '/signup','/forgetpassword'];
         if (!isLogin && !unsecurepath.contains(state.fullPath)) {

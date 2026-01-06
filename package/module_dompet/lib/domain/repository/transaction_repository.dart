@@ -1,0 +1,21 @@
+import 'package:module_dompet/domain/entities/dompet_month_entity.dart';
+import 'package:module_dompet/domain/entities/transaction_entity.dart';
+
+abstract class TransactionRepository {
+  // Read
+  Stream<List<TransactionEntity>> getListTransaction({bool? withTempat});
+  Future<TransactionEntity> getTransactionDetail(int transactionId);
+
+  // Create
+  Future<int> insertTransaction(TransactionEntity entity, int dompetId);
+
+  // Update
+  Future<void> updateTransaction(TransactionEntity entity, int dompetId);
+
+  // Delete
+  Future<void> deleteTransaction(int transactionId);
+  Future<void> deleteDompetMonth(int dompetMonthId);
+  
+  // DompetMonth
+  Stream<List<DompetMonthEntity>> watchDompetMonths(int dompetId);
+}
