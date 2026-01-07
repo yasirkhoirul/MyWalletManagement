@@ -20,39 +20,99 @@ class NetworkService {
   final StreamController<bool> _controller = StreamController<bool>.broadcast();
   Stream<bool> get onStatus => _controller.stream;
 
-  StreamSubscription<ConnectivityResult>? _connectivitySub;
+  StreamSubscription<dynamic>? _connectivitySub;
   Timer? _debounceTimer;
+  Timer? _periodicTimer;
+  bool _lastKnownStatus =
+      true; // Assume online initially until proven otherwise
+  bool _hasEmittedInitial = false;
 
   void _init() {
-    Logger().d('NetworkService: init');
-    // emit a conservative initial value (assume offline) so listeners have a value
-    _controller.add(false);
-    // perform initial real check
-    _check();
-    // also query connectivity once to log state
-    Connectivity().checkConnectivity().then((result) => Logger().d('NetworkService: initial connectivity result $result'));
-    // listen connectivity changes and verify real internet access
-    _connectivitySub = Connectivity().onConnectivityChanged.listen((e) {
-      Logger().d('NetworkService: connectivity change detected: $e');
+    // Perform initial real check immediately
+    _checkInitial();
+
+    // Listen to connectivity changes and verify real internet access
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       // debounce rapid connectivity events
       _debounceTimer?.cancel();
       _debounceTimer = Timer(const Duration(milliseconds: 500), () {
         _check();
       });
     });
+
+    // Periodic check every 30 seconds to handle edge cases
+    _periodicTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _check();
+    });
+  }
+
+  /// Initial check that always emits status
+  Future<void> _checkInitial() async {
+    try {
+      // Wait a bit for system to stabilize on app start
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Check actual internet connection directly
+      final hasConnection = await InternetConnectionChecker().hasConnection;
+      _lastKnownStatus = hasConnection;
+      _hasEmittedInitial = true;
+      _controller.add(hasConnection);
+      Logger().d(
+        'NetworkService: initial check = ${hasConnection ? "ONLINE" : "OFFLINE"}',
+      );
+    } catch (e) {
+      Logger().e('NetworkService initial check error: $e');
+      // On error, emit true to not block the user
+      _lastKnownStatus = true;
+      _hasEmittedInitial = true;
+      _controller.add(true);
+    }
   }
 
   Future<void> _check() async {
     try {
-      Logger().d('NetworkService: performing internet connection check...');
+      // First check if we have any connectivity
+      final connectivityResult = await Connectivity().checkConnectivity();
+
+      // Handle both single result and list (API changed in newer versions)
+      bool hasNoConnectivity = false;
+      if (connectivityResult is List) {
+        hasNoConnectivity =
+            (connectivityResult as List).isEmpty ||
+            (connectivityResult as List).every(
+              (r) => r == ConnectivityResult.none,
+            );
+      } else {
+        hasNoConnectivity = connectivityResult == ConnectivityResult.none;
+      }
+
+      if (hasNoConnectivity) {
+        _updateStatus(false);
+        return;
+      }
+
+      // Verify actual internet connection
       final hasConnection = await InternetConnectionChecker().hasConnection;
-      Logger().d('NetworkService: hasConnection = $hasConnection');
-      _controller.add(hasConnection);
+      _updateStatus(hasConnection);
     } catch (e) {
-      Logger().e('NetworkService: error during check: $e');
-      _controller.add(false);
+      Logger().e('NetworkService check error: $e');
+      // On error, keep last known status to avoid flickering
     }
   }
+
+  void _updateStatus(bool isOnline) {
+    if (_lastKnownStatus != isOnline || !_hasEmittedInitial) {
+      _lastKnownStatus = isOnline;
+      _hasEmittedInitial = true;
+      _controller.add(isOnline);
+      Logger().d(
+        'NetworkService: status changed to ${isOnline ? "ONLINE" : "OFFLINE"}',
+      );
+    }
+  }
+
+  /// Get current status synchronously (last known)
+  bool get isOnline => _lastKnownStatus;
 
   /// Public API to force a connectivity re-check.
   Future<void> refresh() async => _check();
@@ -60,6 +120,7 @@ class NetworkService {
   void dispose() {
     _connectivitySub?.cancel();
     _debounceTimer?.cancel();
+    _periodicTimer?.cancel();
     _controller.close();
   }
 }

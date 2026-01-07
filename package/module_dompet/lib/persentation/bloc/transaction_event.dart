@@ -24,3 +24,8 @@ class DeleteTransactionEvent extends TransactionEvent {
   final int transactionId;
   DeleteTransactionEvent(this.transactionId);
 }
+
+class ProcessReceiptEvent extends TransactionEvent {
+  final File imageFile;
+  ProcessReceiptEvent(this.imageFile);
+}

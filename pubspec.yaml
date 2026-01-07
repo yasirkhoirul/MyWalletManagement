@@ -36,12 +36,21 @@ dependencies:
     path: package/module_core
   module_dompet:
     path: package/module_dompet
-  firebase_core: ^4.3.0
-  firebase_auth: ^6.1.3
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.5.0
   go_router: ^17.0.1
   flutter_bloc: ^9.1.1
   get_it: ^9.2.0
   logger: ^2.6.2
+  firebase_storage: ^12.4.0
+  firebase_ai: ^2.3.0      
+  uuid: ^4.3.3
+  firebase_vertexai: ^1.0.0
+  speech_to_text: ^7.0.0
+  fl_chart: ^0.69.0
+  cloud_firestore: ^5.6.0
+  firebase_app_check: ^0.3.2
+  shared_preferences: ^2.2.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

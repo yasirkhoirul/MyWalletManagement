@@ -8,4 +8,5 @@ mixin _$TransactionDaoMixin on DatabaseAccessor<AppDatabase> {
   $DompetMonthTable get dompetMonth => attachedDatabase.dompetMonth;
   $TransactionsTable get transactions => attachedDatabase.transactions;
   $TempatTable get tempat => attachedDatabase.tempat;
+  $BudgetLimitsTable get budgetLimits => attachedDatabase.budgetLimits;
 }

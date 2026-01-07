@@ -8,6 +8,11 @@ class GetListTransaction extends TransactionListEvent {
   GetListTransaction({this.withTempat});
 }
 
+class GetTransactionsByDompetIdEvent extends TransactionListEvent {
+  final int dompetId;
+  GetTransactionsByDompetIdEvent(this.dompetId);
+}
+
 // Internal event used to update the transactions list from the stream
 class _TransactionsUpdatedEvent extends TransactionListEvent {
   final List<TransactionEntity> transactions;

@@ -7,6 +7,8 @@ class TransactionEntity {
   final DateTime tanggal;
   final bool isUpload;
   final TypeTransaction type;
+  final String? description;
+  final ExpenseCategory? expenseCategory;
   final String? receiptImagePath;
   final String? voiceNotePath;
   final TempatEntity? place;
@@ -18,6 +20,8 @@ class TransactionEntity {
     required this.tanggal,
     required this.isUpload,
     required this.type,
+    this.description,
+    this.expenseCategory,
     this.receiptImagePath,
     this.voiceNotePath,
     this.place,
@@ -25,7 +29,8 @@ class TransactionEntity {
   });
 
   @override
-  String toString() => 'TransactionEntity(id: $id, amount: $amount, tanggal: $tanggal, isUpload: $isUpload, type: $type, place: $place, dompetmonthid: $dompetmonthid)';
+  String toString() =>
+      'TransactionEntity(id: $id, amount: $amount, tanggal: $tanggal, isUpload: $isUpload, type: $type, description: $description, expenseCategory: $expenseCategory, place: $place, dompetmonthid: $dompetmonthid)';
 
   @override
   bool operator ==(Object other) =>
@@ -37,6 +42,8 @@ class TransactionEntity {
           tanggal == other.tanggal &&
           isUpload == other.isUpload &&
           type == other.type &&
+          description == other.description &&
+          expenseCategory == other.expenseCategory &&
           receiptImagePath == other.receiptImagePath &&
           voiceNotePath == other.voiceNotePath &&
           place == other.place &&
@@ -44,5 +51,16 @@ class TransactionEntity {
 
   @override
   int get hashCode => Object.hash(
-      id, amount, tanggal, isUpload, type, receiptImagePath, voiceNotePath, place, dompetmonthid);
+    id,
+    amount,
+    tanggal,
+    isUpload,
+    type,
+    description,
+    expenseCategory,
+    receiptImagePath,
+    voiceNotePath,
+    place,
+    dompetmonthid,
+  );
 }

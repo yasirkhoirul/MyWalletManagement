@@ -43,3 +43,44 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ============================================
+# SECURITY - Sensitive files (NEVER commit!)
+# ============================================
+
+# Keystore files
+*.jks
+*.keystore
+*.p12
+*.pk8
+
+# Key properties
+key.properties
+keystore.properties
+
+# Firebase configuration (contains API keys)
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Local configuration
+local.properties
+
+# API Keys and secrets
+**/secrets/
+**/credentials/
+*.pem
+*.key
+
+# Crash logs and analytics
+crashlytics-build.properties
+fabric.properties
+
+# Generated files that may contain sensitive info
+*.g.dart
+*.freezed.dart

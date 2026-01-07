@@ -13,6 +13,11 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       tanggal: DateTime.parse(json['tanggal'] as String),
       isUpload: json['isUpload'] as bool,
       type: $enumDecode(_$TypeTransactionEnumMap, json['type']),
+      description: json['description'] as String?,
+      expenseCategory: $enumDecodeNullable(
+        _$ExpenseCategoryEnumMap,
+        json['expenseCategory'],
+      ),
       receiptImagePath: json['receiptImagePath'] as String?,
       voiceNotePath: json['voiceNotePath'] as String?,
       place: (json['place'] as num?)?.toInt(),
@@ -26,6 +31,8 @@ Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
       'tanggal': instance.tanggal.toIso8601String(),
       'isUpload': instance.isUpload,
       'type': _$TypeTransactionEnumMap[instance.type]!,
+      'description': instance.description,
+      'expenseCategory': _$ExpenseCategoryEnumMap[instance.expenseCategory],
       'receiptImagePath': instance.receiptImagePath,
       'voiceNotePath': instance.voiceNotePath,
       'place': instance.place,
@@ -35,4 +42,15 @@ Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
 const _$TypeTransactionEnumMap = {
   TypeTransaction.pemasukkan: 'pemasukkan',
   TypeTransaction.pengeluaran: 'pengeluaran',
+};
+
+const _$ExpenseCategoryEnumMap = {
+  ExpenseCategory.makanan: 'makanan',
+  ExpenseCategory.transportasi: 'transportasi',
+  ExpenseCategory.belanja: 'belanja',
+  ExpenseCategory.hiburan: 'hiburan',
+  ExpenseCategory.kesehatan: 'kesehatan',
+  ExpenseCategory.pendidikan: 'pendidikan',
+  ExpenseCategory.tagihan: 'tagihan',
+  ExpenseCategory.lainnya: 'lainnya',
 };

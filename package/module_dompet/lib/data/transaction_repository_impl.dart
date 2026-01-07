@@ -1,13 +1,22 @@
+import 'dart:io';
+
+import 'package:logger/logger.dart';
 import 'package:module_dompet/data/datasource/dompet_local_datasource.dart';
+import 'package:module_dompet/data/datasource/receipt_remote_datasource.dart';
+import 'package:module_dompet/data/model/receipt_result_model.dart';
 import 'package:module_dompet/data/model/transaction_detail_model.dart';
 import 'package:module_dompet/domain/entities/dompet_month_entity.dart';
+import 'package:module_dompet/domain/entities/receipt_entity.dart';
 import 'package:module_dompet/domain/entities/transaction_entity.dart';
 import 'package:module_dompet/domain/repository/transaction_repository.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
   final DompetLocalDatasource localDatasource;
-  
-  TransactionRepositoryImpl(this.localDatasource);
+  final ReceiptRemoteDataSource remoteDataSource;
+  TransactionRepositoryImpl(
+    this.localDatasource, {
+    required this.remoteDataSource,
+  });
 
   @override
   Future<int> insertTransaction(TransactionEntity entity, int dompetId) async {
@@ -24,11 +33,26 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Stream<List<TransactionEntity>> getListTransaction({bool? withTempat}) {
     try {
-      return localDatasource.getListTransaction(withTempat: withTempat).map((models) {
+      return localDatasource.getListTransaction(withTempat: withTempat).map((
+        models,
+      ) {
         return models.map((model) => model.toEntity()).toList();
       });
     } catch (e) {
       throw Exception('Failed to get list transaction: $e');
+    }
+  }
+
+  @override
+  Stream<List<TransactionEntity>> getTransactionsByDompetId(int dompetId) {
+    try {
+      return localDatasource.watchTransactionsByDompetId(dompetId).map((
+        models,
+      ) {
+        return models.map((model) => model.toEntity()).toList();
+      });
+    } catch (e) {
+      throw Exception('Failed to get transactions by dompetId: $e');
     }
   }
 
@@ -78,6 +102,28 @@ class TransactionRepositoryImpl implements TransactionRepository {
       await localDatasource.deleteDompetMonth(dompetMonthId);
     } catch (e) {
       throw Exception('Failed to delete dompet month: $e');
+    }
+  }
+
+  @override
+  Future<ReceiptEntity?> processReceipt(File imageFile) async {
+    try {
+      final ReceiptAnalysisResult? data = await remoteDataSource.processReceipt(
+        imageFile,
+      );
+      if (data == null) {
+        return null;
+      }
+      return ReceiptEntity(
+        amount: data.amount,
+        description: data.description,
+        category: data.category,
+        date: data.date,
+        receiptUrl: data.receiptUrl,
+      );
+    } catch (e) {
+      Logger().e(e);
+      rethrow;
     }
   }
 }

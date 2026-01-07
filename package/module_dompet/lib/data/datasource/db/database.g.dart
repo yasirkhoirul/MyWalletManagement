@@ -788,6 +788,16 @@ class $TransactionsTable extends Transactions
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
   late final GeneratedColumn<double> amount = GeneratedColumn<double>(
@@ -817,10 +827,37 @@ class $TransactionsTable extends Transactions
     aliasedName,
     false,
     type: DriftSqlType.bool,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'CHECK ("is_upload" IN (0, 1))',
     ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _wantToDeleteMeta = const VerificationMeta(
+    'wantToDelete',
+  );
+  @override
+  late final GeneratedColumn<bool> wantToDelete = GeneratedColumn<bool>(
+    'want_to_delete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("want_to_delete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
   );
   @override
   late final GeneratedColumnWithTypeConverter<TypeTransaction, int> type =
@@ -831,6 +868,29 @@ class $TransactionsTable extends Transactions
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<TypeTransaction>($TransactionsTable.$convertertype);
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExpenseCategory?, int>
+  expenseCategory =
+      GeneratedColumn<int>(
+        'expense_category',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<ExpenseCategory?>(
+        $TransactionsTable.$converterexpenseCategoryn,
+      );
   static const VerificationMeta _receiptImagePathMeta = const VerificationMeta(
     'receiptImagePath',
   );
@@ -870,10 +930,15 @@ class $TransactionsTable extends Transactions
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uuid,
     amount,
     tanggal,
     isUpload,
+    wantToDelete,
+    updatedAt,
     type,
+    description,
+    expenseCategory,
     receiptImagePath,
     voiceNotePath,
     dompetmonthid,
@@ -892,6 +957,14 @@ class $TransactionsTable extends Transactions
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uuidMeta);
     }
     if (data.containsKey('amount')) {
       context.handle(
@@ -914,8 +987,32 @@ class $TransactionsTable extends Transactions
         _isUploadMeta,
         isUpload.isAcceptableOrUnknown(data['is_upload']!, _isUploadMeta),
       );
+    }
+    if (data.containsKey('want_to_delete')) {
+      context.handle(
+        _wantToDeleteMeta,
+        wantToDelete.isAcceptableOrUnknown(
+          data['want_to_delete']!,
+          _wantToDeleteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     } else if (isInserting) {
-      context.missing(_isUploadMeta);
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
     }
     if (data.containsKey('receipt_image_path')) {
       context.handle(
@@ -959,6 +1056,10 @@ class $TransactionsTable extends Transactions
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
       amount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
@@ -971,11 +1072,29 @@ class $TransactionsTable extends Transactions
         DriftSqlType.bool,
         data['${effectivePrefix}is_upload'],
       )!,
+      wantToDelete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}want_to_delete'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
       type: $TransactionsTable.$convertertype.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}type'],
         )!,
+      ),
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      expenseCategory: $TransactionsTable.$converterexpenseCategoryn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}expense_category'],
+        ),
       ),
       receiptImagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -999,23 +1118,51 @@ class $TransactionsTable extends Transactions
 
   static JsonTypeConverter2<TypeTransaction, int, int> $convertertype =
       const EnumIndexConverter<TypeTransaction>(TypeTransaction.values);
+  static JsonTypeConverter2<ExpenseCategory, int, int>
+  $converterexpenseCategory = const EnumIndexConverter<ExpenseCategory>(
+    ExpenseCategory.values,
+  );
+  static JsonTypeConverter2<ExpenseCategory?, int?, int?>
+  $converterexpenseCategoryn = JsonTypeConverter2.asNullable(
+    $converterexpenseCategory,
+  );
 }
 
 class Transaction extends DataClass implements Insertable<Transaction> {
   final int id;
+
+  /// UUID for Firestore sync - auto-generated when created offline
+  final String uuid;
   final double amount;
   final DateTime tanggal;
   final bool isUpload;
+
+  /// Soft delete flag - when true, will be deleted from Firestore on next sync
+  final bool wantToDelete;
+
+  /// Last update timestamp for sync conflict resolution
+  final DateTime updatedAt;
   final TypeTransaction type;
+
+  /// Description for the transaction
+  final String? description;
+
+  /// Expense category (only applicable for pengeluaran type)
+  final ExpenseCategory? expenseCategory;
   final String? receiptImagePath;
   final String? voiceNotePath;
   final int dompetmonthid;
   const Transaction({
     required this.id,
+    required this.uuid,
     required this.amount,
     required this.tanggal,
     required this.isUpload,
+    required this.wantToDelete,
+    required this.updatedAt,
     required this.type,
+    this.description,
+    this.expenseCategory,
     this.receiptImagePath,
     this.voiceNotePath,
     required this.dompetmonthid,
@@ -1024,12 +1171,23 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
     map['amount'] = Variable<double>(amount);
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['is_upload'] = Variable<bool>(isUpload);
+    map['want_to_delete'] = Variable<bool>(wantToDelete);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     {
       map['type'] = Variable<int>(
         $TransactionsTable.$convertertype.toSql(type),
+      );
+    }
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || expenseCategory != null) {
+      map['expense_category'] = Variable<int>(
+        $TransactionsTable.$converterexpenseCategoryn.toSql(expenseCategory),
       );
     }
     if (!nullToAbsent || receiptImagePath != null) {
@@ -1045,10 +1203,19 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   TransactionsCompanion toCompanion(bool nullToAbsent) {
     return TransactionsCompanion(
       id: Value(id),
+      uuid: Value(uuid),
       amount: Value(amount),
       tanggal: Value(tanggal),
       isUpload: Value(isUpload),
+      wantToDelete: Value(wantToDelete),
+      updatedAt: Value(updatedAt),
       type: Value(type),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      expenseCategory: expenseCategory == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expenseCategory),
       receiptImagePath: receiptImagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(receiptImagePath),
@@ -1066,11 +1233,18 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Transaction(
       id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
       amount: serializer.fromJson<double>(json['amount']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       isUpload: serializer.fromJson<bool>(json['isUpload']),
+      wantToDelete: serializer.fromJson<bool>(json['wantToDelete']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       type: $TransactionsTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
+      ),
+      description: serializer.fromJson<String?>(json['description']),
+      expenseCategory: $TransactionsTable.$converterexpenseCategoryn.fromJson(
+        serializer.fromJson<int?>(json['expenseCategory']),
       ),
       receiptImagePath: serializer.fromJson<String?>(json['receiptImagePath']),
       voiceNotePath: serializer.fromJson<String?>(json['voiceNotePath']),
@@ -1082,11 +1256,18 @@ class Transaction extends DataClass implements Insertable<Transaction> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
       'amount': serializer.toJson<double>(amount),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'isUpload': serializer.toJson<bool>(isUpload),
+      'wantToDelete': serializer.toJson<bool>(wantToDelete),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'type': serializer.toJson<int>(
         $TransactionsTable.$convertertype.toJson(type),
+      ),
+      'description': serializer.toJson<String?>(description),
+      'expenseCategory': serializer.toJson<int?>(
+        $TransactionsTable.$converterexpenseCategoryn.toJson(expenseCategory),
       ),
       'receiptImagePath': serializer.toJson<String?>(receiptImagePath),
       'voiceNotePath': serializer.toJson<String?>(voiceNotePath),
@@ -1096,19 +1277,31 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
   Transaction copyWith({
     int? id,
+    String? uuid,
     double? amount,
     DateTime? tanggal,
     bool? isUpload,
+    bool? wantToDelete,
+    DateTime? updatedAt,
     TypeTransaction? type,
+    Value<String?> description = const Value.absent(),
+    Value<ExpenseCategory?> expenseCategory = const Value.absent(),
     Value<String?> receiptImagePath = const Value.absent(),
     Value<String?> voiceNotePath = const Value.absent(),
     int? dompetmonthid,
   }) => Transaction(
     id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
     amount: amount ?? this.amount,
     tanggal: tanggal ?? this.tanggal,
     isUpload: isUpload ?? this.isUpload,
+    wantToDelete: wantToDelete ?? this.wantToDelete,
+    updatedAt: updatedAt ?? this.updatedAt,
     type: type ?? this.type,
+    description: description.present ? description.value : this.description,
+    expenseCategory: expenseCategory.present
+        ? expenseCategory.value
+        : this.expenseCategory,
     receiptImagePath: receiptImagePath.present
         ? receiptImagePath.value
         : this.receiptImagePath,
@@ -1120,10 +1313,21 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   Transaction copyWithCompanion(TransactionsCompanion data) {
     return Transaction(
       id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
       amount: data.amount.present ? data.amount.value : this.amount,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       isUpload: data.isUpload.present ? data.isUpload.value : this.isUpload,
+      wantToDelete: data.wantToDelete.present
+          ? data.wantToDelete.value
+          : this.wantToDelete,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       type: data.type.present ? data.type.value : this.type,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      expenseCategory: data.expenseCategory.present
+          ? data.expenseCategory.value
+          : this.expenseCategory,
       receiptImagePath: data.receiptImagePath.present
           ? data.receiptImagePath.value
           : this.receiptImagePath,
@@ -1140,10 +1344,15 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   String toString() {
     return (StringBuffer('Transaction(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('amount: $amount, ')
           ..write('tanggal: $tanggal, ')
           ..write('isUpload: $isUpload, ')
+          ..write('wantToDelete: $wantToDelete, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('type: $type, ')
+          ..write('description: $description, ')
+          ..write('expenseCategory: $expenseCategory, ')
           ..write('receiptImagePath: $receiptImagePath, ')
           ..write('voiceNotePath: $voiceNotePath, ')
           ..write('dompetmonthid: $dompetmonthid')
@@ -1154,10 +1363,15 @@ class Transaction extends DataClass implements Insertable<Transaction> {
   @override
   int get hashCode => Object.hash(
     id,
+    uuid,
     amount,
     tanggal,
     isUpload,
+    wantToDelete,
+    updatedAt,
     type,
+    description,
+    expenseCategory,
     receiptImagePath,
     voiceNotePath,
     dompetmonthid,
@@ -1167,10 +1381,15 @@ class Transaction extends DataClass implements Insertable<Transaction> {
       identical(this, other) ||
       (other is Transaction &&
           other.id == this.id &&
+          other.uuid == this.uuid &&
           other.amount == this.amount &&
           other.tanggal == this.tanggal &&
           other.isUpload == this.isUpload &&
+          other.wantToDelete == this.wantToDelete &&
+          other.updatedAt == this.updatedAt &&
           other.type == this.type &&
+          other.description == this.description &&
+          other.expenseCategory == this.expenseCategory &&
           other.receiptImagePath == this.receiptImagePath &&
           other.voiceNotePath == this.voiceNotePath &&
           other.dompetmonthid == this.dompetmonthid);
@@ -1178,53 +1397,79 @@ class Transaction extends DataClass implements Insertable<Transaction> {
 
 class TransactionsCompanion extends UpdateCompanion<Transaction> {
   final Value<int> id;
+  final Value<String> uuid;
   final Value<double> amount;
   final Value<DateTime> tanggal;
   final Value<bool> isUpload;
+  final Value<bool> wantToDelete;
+  final Value<DateTime> updatedAt;
   final Value<TypeTransaction> type;
+  final Value<String?> description;
+  final Value<ExpenseCategory?> expenseCategory;
   final Value<String?> receiptImagePath;
   final Value<String?> voiceNotePath;
   final Value<int> dompetmonthid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     this.amount = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.isUpload = const Value.absent(),
+    this.wantToDelete = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.type = const Value.absent(),
+    this.description = const Value.absent(),
+    this.expenseCategory = const Value.absent(),
     this.receiptImagePath = const Value.absent(),
     this.voiceNotePath = const Value.absent(),
     this.dompetmonthid = const Value.absent(),
   });
   TransactionsCompanion.insert({
     this.id = const Value.absent(),
+    required String uuid,
     required double amount,
     required DateTime tanggal,
-    required bool isUpload,
+    this.isUpload = const Value.absent(),
+    this.wantToDelete = const Value.absent(),
+    required DateTime updatedAt,
     required TypeTransaction type,
+    this.description = const Value.absent(),
+    this.expenseCategory = const Value.absent(),
     this.receiptImagePath = const Value.absent(),
     this.voiceNotePath = const Value.absent(),
     required int dompetmonthid,
-  }) : amount = Value(amount),
+  }) : uuid = Value(uuid),
+       amount = Value(amount),
        tanggal = Value(tanggal),
-       isUpload = Value(isUpload),
+       updatedAt = Value(updatedAt),
        type = Value(type),
        dompetmonthid = Value(dompetmonthid);
   static Insertable<Transaction> custom({
     Expression<int>? id,
+    Expression<String>? uuid,
     Expression<double>? amount,
     Expression<DateTime>? tanggal,
     Expression<bool>? isUpload,
+    Expression<bool>? wantToDelete,
+    Expression<DateTime>? updatedAt,
     Expression<int>? type,
+    Expression<String>? description,
+    Expression<int>? expenseCategory,
     Expression<String>? receiptImagePath,
     Expression<String>? voiceNotePath,
     Expression<int>? dompetmonthid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
       if (amount != null) 'amount': amount,
       if (tanggal != null) 'tanggal': tanggal,
       if (isUpload != null) 'is_upload': isUpload,
+      if (wantToDelete != null) 'want_to_delete': wantToDelete,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (type != null) 'type': type,
+      if (description != null) 'description': description,
+      if (expenseCategory != null) 'expense_category': expenseCategory,
       if (receiptImagePath != null) 'receipt_image_path': receiptImagePath,
       if (voiceNotePath != null) 'voice_note_path': voiceNotePath,
       if (dompetmonthid != null) 'dompetmonthid': dompetmonthid,
@@ -1233,20 +1478,30 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
 
   TransactionsCompanion copyWith({
     Value<int>? id,
+    Value<String>? uuid,
     Value<double>? amount,
     Value<DateTime>? tanggal,
     Value<bool>? isUpload,
+    Value<bool>? wantToDelete,
+    Value<DateTime>? updatedAt,
     Value<TypeTransaction>? type,
+    Value<String?>? description,
+    Value<ExpenseCategory?>? expenseCategory,
     Value<String?>? receiptImagePath,
     Value<String?>? voiceNotePath,
     Value<int>? dompetmonthid,
   }) {
     return TransactionsCompanion(
       id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
       amount: amount ?? this.amount,
       tanggal: tanggal ?? this.tanggal,
       isUpload: isUpload ?? this.isUpload,
+      wantToDelete: wantToDelete ?? this.wantToDelete,
+      updatedAt: updatedAt ?? this.updatedAt,
       type: type ?? this.type,
+      description: description ?? this.description,
+      expenseCategory: expenseCategory ?? this.expenseCategory,
       receiptImagePath: receiptImagePath ?? this.receiptImagePath,
       voiceNotePath: voiceNotePath ?? this.voiceNotePath,
       dompetmonthid: dompetmonthid ?? this.dompetmonthid,
@@ -1259,6 +1514,9 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
@@ -1268,9 +1526,25 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
     if (isUpload.present) {
       map['is_upload'] = Variable<bool>(isUpload.value);
     }
+    if (wantToDelete.present) {
+      map['want_to_delete'] = Variable<bool>(wantToDelete.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
     if (type.present) {
       map['type'] = Variable<int>(
         $TransactionsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (expenseCategory.present) {
+      map['expense_category'] = Variable<int>(
+        $TransactionsTable.$converterexpenseCategoryn.toSql(
+          expenseCategory.value,
+        ),
       );
     }
     if (receiptImagePath.present) {
@@ -1289,10 +1563,15 @@ class TransactionsCompanion extends UpdateCompanion<Transaction> {
   String toString() {
     return (StringBuffer('TransactionsCompanion(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('amount: $amount, ')
           ..write('tanggal: $tanggal, ')
           ..write('isUpload: $isUpload, ')
+          ..write('wantToDelete: $wantToDelete, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('type: $type, ')
+          ..write('description: $description, ')
+          ..write('expenseCategory: $expenseCategory, ')
           ..write('receiptImagePath: $receiptImagePath, ')
           ..write('voiceNotePath: $voiceNotePath, ')
           ..write('dompetmonthid: $dompetmonthid')
@@ -1765,6 +2044,469 @@ class TempatCompanion extends UpdateCompanion<TempatData> {
   }
 }
 
+class $BudgetLimitsTable extends BudgetLimits
+    with TableInfo<$BudgetLimitsTable, BudgetLimit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetLimitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _dompetIdMeta = const VerificationMeta(
+    'dompetId',
+  );
+  @override
+  late final GeneratedColumn<int> dompetId = GeneratedColumn<int>(
+    'dompet_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES dompet_tabel (id) ON DELETE CASCADE',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ExpenseCategory, int> category =
+      GeneratedColumn<int>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<ExpenseCategory>($BudgetLimitsTable.$convertercategory);
+  static const VerificationMeta _limitAmountMeta = const VerificationMeta(
+    'limitAmount',
+  );
+  @override
+  late final GeneratedColumn<double> limitAmount = GeneratedColumn<double>(
+    'limit_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _monthMeta = const VerificationMeta('month');
+  @override
+  late final GeneratedColumn<int> month = GeneratedColumn<int>(
+    'month',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _yearMeta = const VerificationMeta('year');
+  @override
+  late final GeneratedColumn<int> year = GeneratedColumn<int>(
+    'year',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isNotifiedMeta = const VerificationMeta(
+    'isNotified',
+  );
+  @override
+  late final GeneratedColumn<bool> isNotified = GeneratedColumn<bool>(
+    'is_notified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_notified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    dompetId,
+    category,
+    limitAmount,
+    month,
+    year,
+    isNotified,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budget_limits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BudgetLimit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('dompet_id')) {
+      context.handle(
+        _dompetIdMeta,
+        dompetId.isAcceptableOrUnknown(data['dompet_id']!, _dompetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dompetIdMeta);
+    }
+    if (data.containsKey('limit_amount')) {
+      context.handle(
+        _limitAmountMeta,
+        limitAmount.isAcceptableOrUnknown(
+          data['limit_amount']!,
+          _limitAmountMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_limitAmountMeta);
+    }
+    if (data.containsKey('month')) {
+      context.handle(
+        _monthMeta,
+        month.isAcceptableOrUnknown(data['month']!, _monthMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_monthMeta);
+    }
+    if (data.containsKey('year')) {
+      context.handle(
+        _yearMeta,
+        year.isAcceptableOrUnknown(data['year']!, _yearMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_yearMeta);
+    }
+    if (data.containsKey('is_notified')) {
+      context.handle(
+        _isNotifiedMeta,
+        isNotified.isAcceptableOrUnknown(data['is_notified']!, _isNotifiedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {dompetId, category, month, year},
+  ];
+  @override
+  BudgetLimit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BudgetLimit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      dompetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dompet_id'],
+      )!,
+      category: $BudgetLimitsTable.$convertercategory.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}category'],
+        )!,
+      ),
+      limitAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}limit_amount'],
+      )!,
+      month: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}month'],
+      )!,
+      year: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}year'],
+      )!,
+      isNotified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_notified'],
+      )!,
+    );
+  }
+
+  @override
+  $BudgetLimitsTable createAlias(String alias) {
+    return $BudgetLimitsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ExpenseCategory, int, int> $convertercategory =
+      const EnumIndexConverter<ExpenseCategory>(ExpenseCategory.values);
+}
+
+class BudgetLimit extends DataClass implements Insertable<BudgetLimit> {
+  final int id;
+  final int dompetId;
+  final ExpenseCategory category;
+  final double limitAmount;
+  final int month;
+  final int year;
+  final bool isNotified;
+  const BudgetLimit({
+    required this.id,
+    required this.dompetId,
+    required this.category,
+    required this.limitAmount,
+    required this.month,
+    required this.year,
+    required this.isNotified,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['dompet_id'] = Variable<int>(dompetId);
+    {
+      map['category'] = Variable<int>(
+        $BudgetLimitsTable.$convertercategory.toSql(category),
+      );
+    }
+    map['limit_amount'] = Variable<double>(limitAmount);
+    map['month'] = Variable<int>(month);
+    map['year'] = Variable<int>(year);
+    map['is_notified'] = Variable<bool>(isNotified);
+    return map;
+  }
+
+  BudgetLimitsCompanion toCompanion(bool nullToAbsent) {
+    return BudgetLimitsCompanion(
+      id: Value(id),
+      dompetId: Value(dompetId),
+      category: Value(category),
+      limitAmount: Value(limitAmount),
+      month: Value(month),
+      year: Value(year),
+      isNotified: Value(isNotified),
+    );
+  }
+
+  factory BudgetLimit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BudgetLimit(
+      id: serializer.fromJson<int>(json['id']),
+      dompetId: serializer.fromJson<int>(json['dompetId']),
+      category: $BudgetLimitsTable.$convertercategory.fromJson(
+        serializer.fromJson<int>(json['category']),
+      ),
+      limitAmount: serializer.fromJson<double>(json['limitAmount']),
+      month: serializer.fromJson<int>(json['month']),
+      year: serializer.fromJson<int>(json['year']),
+      isNotified: serializer.fromJson<bool>(json['isNotified']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'dompetId': serializer.toJson<int>(dompetId),
+      'category': serializer.toJson<int>(
+        $BudgetLimitsTable.$convertercategory.toJson(category),
+      ),
+      'limitAmount': serializer.toJson<double>(limitAmount),
+      'month': serializer.toJson<int>(month),
+      'year': serializer.toJson<int>(year),
+      'isNotified': serializer.toJson<bool>(isNotified),
+    };
+  }
+
+  BudgetLimit copyWith({
+    int? id,
+    int? dompetId,
+    ExpenseCategory? category,
+    double? limitAmount,
+    int? month,
+    int? year,
+    bool? isNotified,
+  }) => BudgetLimit(
+    id: id ?? this.id,
+    dompetId: dompetId ?? this.dompetId,
+    category: category ?? this.category,
+    limitAmount: limitAmount ?? this.limitAmount,
+    month: month ?? this.month,
+    year: year ?? this.year,
+    isNotified: isNotified ?? this.isNotified,
+  );
+  BudgetLimit copyWithCompanion(BudgetLimitsCompanion data) {
+    return BudgetLimit(
+      id: data.id.present ? data.id.value : this.id,
+      dompetId: data.dompetId.present ? data.dompetId.value : this.dompetId,
+      category: data.category.present ? data.category.value : this.category,
+      limitAmount: data.limitAmount.present
+          ? data.limitAmount.value
+          : this.limitAmount,
+      month: data.month.present ? data.month.value : this.month,
+      year: data.year.present ? data.year.value : this.year,
+      isNotified: data.isNotified.present
+          ? data.isNotified.value
+          : this.isNotified,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetLimit(')
+          ..write('id: $id, ')
+          ..write('dompetId: $dompetId, ')
+          ..write('category: $category, ')
+          ..write('limitAmount: $limitAmount, ')
+          ..write('month: $month, ')
+          ..write('year: $year, ')
+          ..write('isNotified: $isNotified')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, dompetId, category, limitAmount, month, year, isNotified);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BudgetLimit &&
+          other.id == this.id &&
+          other.dompetId == this.dompetId &&
+          other.category == this.category &&
+          other.limitAmount == this.limitAmount &&
+          other.month == this.month &&
+          other.year == this.year &&
+          other.isNotified == this.isNotified);
+}
+
+class BudgetLimitsCompanion extends UpdateCompanion<BudgetLimit> {
+  final Value<int> id;
+  final Value<int> dompetId;
+  final Value<ExpenseCategory> category;
+  final Value<double> limitAmount;
+  final Value<int> month;
+  final Value<int> year;
+  final Value<bool> isNotified;
+  const BudgetLimitsCompanion({
+    this.id = const Value.absent(),
+    this.dompetId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.limitAmount = const Value.absent(),
+    this.month = const Value.absent(),
+    this.year = const Value.absent(),
+    this.isNotified = const Value.absent(),
+  });
+  BudgetLimitsCompanion.insert({
+    this.id = const Value.absent(),
+    required int dompetId,
+    required ExpenseCategory category,
+    required double limitAmount,
+    required int month,
+    required int year,
+    this.isNotified = const Value.absent(),
+  }) : dompetId = Value(dompetId),
+       category = Value(category),
+       limitAmount = Value(limitAmount),
+       month = Value(month),
+       year = Value(year);
+  static Insertable<BudgetLimit> custom({
+    Expression<int>? id,
+    Expression<int>? dompetId,
+    Expression<int>? category,
+    Expression<double>? limitAmount,
+    Expression<int>? month,
+    Expression<int>? year,
+    Expression<bool>? isNotified,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (dompetId != null) 'dompet_id': dompetId,
+      if (category != null) 'category': category,
+      if (limitAmount != null) 'limit_amount': limitAmount,
+      if (month != null) 'month': month,
+      if (year != null) 'year': year,
+      if (isNotified != null) 'is_notified': isNotified,
+    });
+  }
+
+  BudgetLimitsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? dompetId,
+    Value<ExpenseCategory>? category,
+    Value<double>? limitAmount,
+    Value<int>? month,
+    Value<int>? year,
+    Value<bool>? isNotified,
+  }) {
+    return BudgetLimitsCompanion(
+      id: id ?? this.id,
+      dompetId: dompetId ?? this.dompetId,
+      category: category ?? this.category,
+      limitAmount: limitAmount ?? this.limitAmount,
+      month: month ?? this.month,
+      year: year ?? this.year,
+      isNotified: isNotified ?? this.isNotified,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (dompetId.present) {
+      map['dompet_id'] = Variable<int>(dompetId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<int>(
+        $BudgetLimitsTable.$convertercategory.toSql(category.value),
+      );
+    }
+    if (limitAmount.present) {
+      map['limit_amount'] = Variable<double>(limitAmount.value);
+    }
+    if (month.present) {
+      map['month'] = Variable<int>(month.value);
+    }
+    if (year.present) {
+      map['year'] = Variable<int>(year.value);
+    }
+    if (isNotified.present) {
+      map['is_notified'] = Variable<bool>(isNotified.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetLimitsCompanion(')
+          ..write('id: $id, ')
+          ..write('dompetId: $dompetId, ')
+          ..write('category: $category, ')
+          ..write('limitAmount: $limitAmount, ')
+          ..write('month: $month, ')
+          ..write('year: $year, ')
+          ..write('isNotified: $isNotified')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1772,6 +2514,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DompetMonthTable dompetMonth = $DompetMonthTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $TempatTable tempat = $TempatTable(this);
+  late final $BudgetLimitsTable budgetLimits = $BudgetLimitsTable(this);
   late final TransactionDao transactionDao = TransactionDao(
     this as AppDatabase,
   );
@@ -1784,6 +2527,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dompetMonth,
     transactions,
     tempat,
+    budgetLimits,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1807,6 +2551,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('tempat', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'dompet_tabel',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('budget_limits', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -1845,6 +2596,27 @@ final class $$DompetTabelTableReferences
     ).filter((f) => f.dompetid.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_dompetMonthRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$BudgetLimitsTable, List<BudgetLimit>>
+  _budgetLimitsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.budgetLimits,
+    aliasName: $_aliasNameGenerator(
+      db.dompetTabel.id,
+      db.budgetLimits.dompetId,
+    ),
+  );
+
+  $$BudgetLimitsTableProcessedTableManager get budgetLimitsRefs {
+    final manager = $$BudgetLimitsTableTableManager(
+      $_db,
+      $_db.budgetLimits,
+    ).filter((f) => f.dompetId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_budgetLimitsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -1901,6 +2673,31 @@ class $$DompetTabelTableFilterComposer
           }) => $$DompetMonthTableFilterComposer(
             $db: $db,
             $table: $db.dompetMonth,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> budgetLimitsRefs(
+    Expression<bool> Function($$BudgetLimitsTableFilterComposer f) f,
+  ) {
+    final $$BudgetLimitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgetLimits,
+      getReferencedColumn: (t) => t.dompetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetLimitsTableFilterComposer(
+            $db: $db,
+            $table: $db.budgetLimits,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -1998,6 +2795,31 @@ class $$DompetTabelTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> budgetLimitsRefs<T extends Object>(
+    Expression<T> Function($$BudgetLimitsTableAnnotationComposer a) f,
+  ) {
+    final $$BudgetLimitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgetLimits,
+      getReferencedColumn: (t) => t.dompetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BudgetLimitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.budgetLimits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$DompetTabelTableTableManager
@@ -2013,7 +2835,7 @@ class $$DompetTabelTableTableManager
           $$DompetTabelTableUpdateCompanionBuilder,
           (DompetTabelData, $$DompetTabelTableReferences),
           DompetTabelData,
-          PrefetchHooks Function({bool dompetMonthRefs})
+          PrefetchHooks Function({bool dompetMonthRefs, bool budgetLimitsRefs})
         > {
   $$DompetTabelTableTableManager(_$AppDatabase db, $DompetTabelTable table)
     : super(
@@ -2062,36 +2884,63 @@ class $$DompetTabelTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({dompetMonthRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (dompetMonthRefs) db.dompetMonth],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (dompetMonthRefs)
-                    await $_getPrefetchedData<
-                      DompetTabelData,
-                      $DompetTabelTable,
-                      DompetMonthData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$DompetTabelTableReferences
-                          ._dompetMonthRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$DompetTabelTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).dompetMonthRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.dompetid == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({dompetMonthRefs = false, budgetLimitsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (dompetMonthRefs) db.dompetMonth,
+                    if (budgetLimitsRefs) db.budgetLimits,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (dompetMonthRefs)
+                        await $_getPrefetchedData<
+                          DompetTabelData,
+                          $DompetTabelTable,
+                          DompetMonthData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DompetTabelTableReferences
+                              ._dompetMonthRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DompetTabelTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).dompetMonthRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.dompetid == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (budgetLimitsRefs)
+                        await $_getPrefetchedData<
+                          DompetTabelData,
+                          $DompetTabelTable,
+                          BudgetLimit
+                        >(
+                          currentTable: table,
+                          referencedTable: $$DompetTabelTableReferences
+                              ._budgetLimitsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$DompetTabelTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).budgetLimitsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.dompetId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -2108,7 +2957,7 @@ typedef $$DompetTabelTableProcessedTableManager =
       $$DompetTabelTableUpdateCompanionBuilder,
       (DompetTabelData, $$DompetTabelTableReferences),
       DompetTabelData,
-      PrefetchHooks Function({bool dompetMonthRefs})
+      PrefetchHooks Function({bool dompetMonthRefs, bool budgetLimitsRefs})
     >;
 typedef $$DompetMonthTableCreateCompanionBuilder =
     DompetMonthCompanion Function({
@@ -2547,10 +3396,15 @@ typedef $$DompetMonthTableProcessedTableManager =
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       Value<int> id,
+      required String uuid,
       required double amount,
       required DateTime tanggal,
-      required bool isUpload,
+      Value<bool> isUpload,
+      Value<bool> wantToDelete,
+      required DateTime updatedAt,
       required TypeTransaction type,
+      Value<String?> description,
+      Value<ExpenseCategory?> expenseCategory,
       Value<String?> receiptImagePath,
       Value<String?> voiceNotePath,
       required int dompetmonthid,
@@ -2558,10 +3412,15 @@ typedef $$TransactionsTableCreateCompanionBuilder =
 typedef $$TransactionsTableUpdateCompanionBuilder =
     TransactionsCompanion Function({
       Value<int> id,
+      Value<String> uuid,
       Value<double> amount,
       Value<DateTime> tanggal,
       Value<bool> isUpload,
+      Value<bool> wantToDelete,
+      Value<DateTime> updatedAt,
       Value<TypeTransaction> type,
+      Value<String?> description,
+      Value<ExpenseCategory?> expenseCategory,
       Value<String?> receiptImagePath,
       Value<String?> voiceNotePath,
       Value<int> dompetmonthid,
@@ -2627,6 +3486,11 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnFilters(column),
@@ -2642,9 +3506,30 @@ class $$TransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get wantToDelete => $composableBuilder(
+    column: $table.wantToDelete,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnWithTypeConverterFilters<TypeTransaction, TypeTransaction, int>
   get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ExpenseCategory?, ExpenseCategory, int>
+  get expenseCategory => $composableBuilder(
+    column: $table.expenseCategory,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -2721,6 +3606,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnOrderings(column),
@@ -2736,8 +3626,28 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get wantToDelete => $composableBuilder(
+    column: $table.wantToDelete,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get expenseCategory => $composableBuilder(
+    column: $table.expenseCategory,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2787,6 +3697,9 @@ class $$TransactionsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
@@ -2796,8 +3709,27 @@ class $$TransactionsTableAnnotationComposer
   GeneratedColumn<bool> get isUpload =>
       $composableBuilder(column: $table.isUpload, builder: (column) => column);
 
+  GeneratedColumn<bool> get wantToDelete => $composableBuilder(
+    column: $table.wantToDelete,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<TypeTransaction, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<ExpenseCategory?, int> get expenseCategory =>
+      $composableBuilder(
+        column: $table.expenseCategory,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<String> get receiptImagePath => $composableBuilder(
     column: $table.receiptImagePath,
@@ -2887,19 +3819,29 @@ class $$TransactionsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
                 Value<double> amount = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<bool> isUpload = const Value.absent(),
+                Value<bool> wantToDelete = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
                 Value<TypeTransaction> type = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<ExpenseCategory?> expenseCategory = const Value.absent(),
                 Value<String?> receiptImagePath = const Value.absent(),
                 Value<String?> voiceNotePath = const Value.absent(),
                 Value<int> dompetmonthid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
+                uuid: uuid,
                 amount: amount,
                 tanggal: tanggal,
                 isUpload: isUpload,
+                wantToDelete: wantToDelete,
+                updatedAt: updatedAt,
                 type: type,
+                description: description,
+                expenseCategory: expenseCategory,
                 receiptImagePath: receiptImagePath,
                 voiceNotePath: voiceNotePath,
                 dompetmonthid: dompetmonthid,
@@ -2907,19 +3849,29 @@ class $$TransactionsTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                required String uuid,
                 required double amount,
                 required DateTime tanggal,
-                required bool isUpload,
+                Value<bool> isUpload = const Value.absent(),
+                Value<bool> wantToDelete = const Value.absent(),
+                required DateTime updatedAt,
                 required TypeTransaction type,
+                Value<String?> description = const Value.absent(),
+                Value<ExpenseCategory?> expenseCategory = const Value.absent(),
                 Value<String?> receiptImagePath = const Value.absent(),
                 Value<String?> voiceNotePath = const Value.absent(),
                 required int dompetmonthid,
               }) => TransactionsCompanion.insert(
                 id: id,
+                uuid: uuid,
                 amount: amount,
                 tanggal: tanggal,
                 isUpload: isUpload,
+                wantToDelete: wantToDelete,
+                updatedAt: updatedAt,
                 type: type,
+                description: description,
+                expenseCategory: expenseCategory,
                 receiptImagePath: receiptImagePath,
                 voiceNotePath: voiceNotePath,
                 dompetmonthid: dompetmonthid,
@@ -3366,6 +4318,362 @@ typedef $$TempatTableProcessedTableManager =
       TempatData,
       PrefetchHooks Function({bool transactionId})
     >;
+typedef $$BudgetLimitsTableCreateCompanionBuilder =
+    BudgetLimitsCompanion Function({
+      Value<int> id,
+      required int dompetId,
+      required ExpenseCategory category,
+      required double limitAmount,
+      required int month,
+      required int year,
+      Value<bool> isNotified,
+    });
+typedef $$BudgetLimitsTableUpdateCompanionBuilder =
+    BudgetLimitsCompanion Function({
+      Value<int> id,
+      Value<int> dompetId,
+      Value<ExpenseCategory> category,
+      Value<double> limitAmount,
+      Value<int> month,
+      Value<int> year,
+      Value<bool> isNotified,
+    });
+
+final class $$BudgetLimitsTableReferences
+    extends BaseReferences<_$AppDatabase, $BudgetLimitsTable, BudgetLimit> {
+  $$BudgetLimitsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DompetTabelTable _dompetIdTable(_$AppDatabase db) =>
+      db.dompetTabel.createAlias(
+        $_aliasNameGenerator(db.budgetLimits.dompetId, db.dompetTabel.id),
+      );
+
+  $$DompetTabelTableProcessedTableManager get dompetId {
+    final $_column = $_itemColumn<int>('dompet_id')!;
+
+    final manager = $$DompetTabelTableTableManager(
+      $_db,
+      $_db.dompetTabel,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_dompetIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BudgetLimitsTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetLimitsTable> {
+  $$BudgetLimitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ExpenseCategory, ExpenseCategory, int>
+  get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<double> get limitAmount => $composableBuilder(
+    column: $table.limitAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get month => $composableBuilder(
+    column: $table.month,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isNotified => $composableBuilder(
+    column: $table.isNotified,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DompetTabelTableFilterComposer get dompetId {
+    final $$DompetTabelTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dompetId,
+      referencedTable: $db.dompetTabel,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DompetTabelTableFilterComposer(
+            $db: $db,
+            $table: $db.dompetTabel,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetLimitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetLimitsTable> {
+  $$BudgetLimitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get limitAmount => $composableBuilder(
+    column: $table.limitAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get month => $composableBuilder(
+    column: $table.month,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get year => $composableBuilder(
+    column: $table.year,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isNotified => $composableBuilder(
+    column: $table.isNotified,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DompetTabelTableOrderingComposer get dompetId {
+    final $$DompetTabelTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dompetId,
+      referencedTable: $db.dompetTabel,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DompetTabelTableOrderingComposer(
+            $db: $db,
+            $table: $db.dompetTabel,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetLimitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetLimitsTable> {
+  $$BudgetLimitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ExpenseCategory, int> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<double> get limitAmount => $composableBuilder(
+    column: $table.limitAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get month =>
+      $composableBuilder(column: $table.month, builder: (column) => column);
+
+  GeneratedColumn<int> get year =>
+      $composableBuilder(column: $table.year, builder: (column) => column);
+
+  GeneratedColumn<bool> get isNotified => $composableBuilder(
+    column: $table.isNotified,
+    builder: (column) => column,
+  );
+
+  $$DompetTabelTableAnnotationComposer get dompetId {
+    final $$DompetTabelTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.dompetId,
+      referencedTable: $db.dompetTabel,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DompetTabelTableAnnotationComposer(
+            $db: $db,
+            $table: $db.dompetTabel,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BudgetLimitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetLimitsTable,
+          BudgetLimit,
+          $$BudgetLimitsTableFilterComposer,
+          $$BudgetLimitsTableOrderingComposer,
+          $$BudgetLimitsTableAnnotationComposer,
+          $$BudgetLimitsTableCreateCompanionBuilder,
+          $$BudgetLimitsTableUpdateCompanionBuilder,
+          (BudgetLimit, $$BudgetLimitsTableReferences),
+          BudgetLimit,
+          PrefetchHooks Function({bool dompetId})
+        > {
+  $$BudgetLimitsTableTableManager(_$AppDatabase db, $BudgetLimitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetLimitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetLimitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetLimitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> dompetId = const Value.absent(),
+                Value<ExpenseCategory> category = const Value.absent(),
+                Value<double> limitAmount = const Value.absent(),
+                Value<int> month = const Value.absent(),
+                Value<int> year = const Value.absent(),
+                Value<bool> isNotified = const Value.absent(),
+              }) => BudgetLimitsCompanion(
+                id: id,
+                dompetId: dompetId,
+                category: category,
+                limitAmount: limitAmount,
+                month: month,
+                year: year,
+                isNotified: isNotified,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int dompetId,
+                required ExpenseCategory category,
+                required double limitAmount,
+                required int month,
+                required int year,
+                Value<bool> isNotified = const Value.absent(),
+              }) => BudgetLimitsCompanion.insert(
+                id: id,
+                dompetId: dompetId,
+                category: category,
+                limitAmount: limitAmount,
+                month: month,
+                year: year,
+                isNotified: isNotified,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BudgetLimitsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({dompetId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (dompetId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.dompetId,
+                                referencedTable: $$BudgetLimitsTableReferences
+                                    ._dompetIdTable(db),
+                                referencedColumn: $$BudgetLimitsTableReferences
+                                    ._dompetIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BudgetLimitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetLimitsTable,
+      BudgetLimit,
+      $$BudgetLimitsTableFilterComposer,
+      $$BudgetLimitsTableOrderingComposer,
+      $$BudgetLimitsTableAnnotationComposer,
+      $$BudgetLimitsTableCreateCompanionBuilder,
+      $$BudgetLimitsTableUpdateCompanionBuilder,
+      (BudgetLimit, $$BudgetLimitsTableReferences),
+      BudgetLimit,
+      PrefetchHooks Function({bool dompetId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3378,4 +4686,6 @@ class $AppDatabaseManager {
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$TempatTableTableManager get tempat =>
       $$TempatTableTableManager(_db, _db.tempat);
+  $$BudgetLimitsTableTableManager get budgetLimits =>
+      $$BudgetLimitsTableTableManager(_db, _db.budgetLimits);
 }
