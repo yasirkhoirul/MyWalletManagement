@@ -72,6 +72,9 @@ class _TransactionPageState extends State<TransactionPage>
   bool _fabExpanded = false;
   bool _dialogShown = false;
 
+  // Track last URI to detect route changes in StatefulShellRoute
+  Uri? _lastUri;
+
   @override
   void initState() {
     super.initState();
@@ -81,11 +84,22 @@ class _TransactionPageState extends State<TransactionPage>
 
     // Fetch transaction list on init
     context.read<TransactionListBloc>().add(GetListTransaction());
+  }
 
-    // Handle query params from overview page navigation
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _handleQueryParams();
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check if URI changed - this handles StatefulShellRoute branch switching
+    final currentUri = GoRouterState.of(context).uri;
+    if (_lastUri?.toString() != currentUri.toString()) {
+      _lastUri = currentUri;
+      // Handle query params when route changes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _handleQueryParams();
+        }
+      });
+    }
   }
 
   void _handleQueryParams() {
@@ -282,13 +296,10 @@ class _TransactionPageState extends State<TransactionPage>
               });
             }
 
-            // Show success message
-            if (mounted) {
-              final messenger = ScaffoldMessenger.maybeOf(context);
-              messenger?.showSnackBar(
-                const SnackBar(content: Text('Struk berhasil diproses')),
-              );
-            }
+            // Show success message via FAB notification
+            NotificationService().showTransactionSuccess(
+              'Struk berhasil diproses!',
+            );
           } else if (state is ProcessReceiptError) {
             // Close loading dialog if open
             if (Navigator.of(context).canPop()) {

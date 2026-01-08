@@ -258,33 +258,33 @@ class _DompetMonthPageState extends State<DompetMonthPage>
                                         ),
                                       ),
                                       const SizedBox(width: 12),
-                                      // Delete button or loading indicator
-                                      if (month.id != null)
-                                        state.deletingIds.contains(month.id)
-                                            ? const SizedBox(
-                                                width: 20,
-                                                height: 20,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                    ),
-                                              )
-                                            : IconButton(
-                                                tooltip: 'Delete month',
-                                                icon: const Icon(
-                                                  Icons.delete_outline,
-                                                  color: Colors.red,
-                                                ),
-                                                onPressed: () {
-                                                  context
-                                                      .read<DompetMonthBloc>()
-                                                      .add(
-                                                        DeleteDompetMonthEvent(
-                                                          month.id!,
-                                                        ),
-                                                      );
-                                                },
-                                              ),
+                                      // // Delete button or loading indicator
+                                      // if (month.id != null)
+                                      //   state.deletingIds.contains(month.id)
+                                      //       ? const SizedBox(
+                                      //           width: 20,
+                                      //           height: 20,
+                                      //           child:
+                                      //               CircularProgressIndicator(
+                                      //                 strokeWidth: 2,
+                                      //               ),
+                                      //         )
+                                      //       : IconButton(
+                                      //           tooltip: 'Delete month',
+                                      //           icon: const Icon(
+                                      //             Icons.delete_outline,
+                                      //             color: Colors.red,
+                                      //           ),
+                                      //           onPressed: () {
+                                      //             context
+                                      //                 .read<DompetMonthBloc>()
+                                      //                 .add(
+                                      //                   DeleteDompetMonthEvent(
+                                      //                     month.id!,
+                                      //                   ),
+                                      //                 );
+                                      //           },
+                                      //         ),
                                     ],
                                   ),
                                 ],

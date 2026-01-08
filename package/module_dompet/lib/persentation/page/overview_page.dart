@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:module_core/constant/constant.dart';
 import 'package:module_core/service/network/network_service.dart';
+import 'package:module_core/service/notification/notification_service.dart';
 import 'package:module_dompet/data/datasource/voice_remote_datasource.dart';
+import 'package:module_dompet/data/model/receipt_result_model.dart';
 import 'package:module_dompet/persentation/bloc/analyze_bloc.dart';
 import 'package:module_dompet/persentation/bloc/analyze_event.dart';
 import 'package:module_dompet/persentation/bloc/analyze_state.dart';
@@ -408,14 +410,19 @@ class _OverviewPageState extends State<OverviewPage>
                         label: 'Scan Struk',
                         color: Colors.purple,
                         onTap: () async {
-                          // Pick image and navigate with it
+                          // Pick image from camera with compression for faster processing
                           final XFile? image = await _imagePicker.pickImage(
                             source: ImageSource.camera,
+                            imageQuality: 75, // Compress to 75% quality
+                            maxWidth: 1080, // Limit max width to 1080px
                           );
                           if (image != null && mounted) {
-                            context.push(
-                              '/transaction?scanImage=${image.path}',
+                            // Show notification that image is being processed
+                            NotificationService().showInfo(
+                              'Foto struk berhasil diambil!',
                             );
+                            // Switch to transaction branch with image path
+                            context.go('/transaction?scanImage=${image.path}');
                           }
                         },
                       ),
@@ -425,6 +432,9 @@ class _OverviewPageState extends State<OverviewPage>
                         label: 'Input Suara',
                         color: Colors.orange,
                         onTap: () {
+                          // Variable to store voice result
+                          ReceiptAnalysisResult? voiceResult;
+
                           // Show voice recording sheet
                           showModalBottomSheet(
                             context: context,
@@ -433,21 +443,29 @@ class _OverviewPageState extends State<OverviewPage>
                             builder: (sheetContext) => VoiceRecordingSheet(
                               voiceDataSource: VoiceRemoteDataSourceImpl(),
                               onResult: (result) {
-                                // Close the modal sheet first using Navigator (not go_router)
-                                Navigator.of(sheetContext).pop();
-                                // Navigate with voice data as query params
-                                final amount = result.amount?.toInt() ?? 0;
-                                final desc = Uri.encodeComponent(
-                                  result.description ?? '',
-                                );
-                                final cat = result.category?.name ?? '';
-                                // Use push to keep overview in stack, not go which replaces
-                                context.push(
-                                  '/transaction?voiceAmount=$amount&voiceDesc=$desc&voiceCat=$cat',
-                                );
+                                // Just store the result - VoiceRecordingSheet will pop itself
+                                voiceResult = result;
                               },
                             ),
-                          );
+                          ).then((_) {
+                            // This runs AFTER modal is fully closed
+                            if (voiceResult != null && mounted) {
+                              NotificationService().showInfo(
+                                'Suara berhasil diproses!',
+                              );
+
+                              final amount = voiceResult!.amount?.toInt() ?? 0;
+                              final desc = Uri.encodeComponent(
+                                voiceResult!.description ?? '',
+                              );
+                              final cat = voiceResult!.category?.name ?? '';
+
+                              // Switch to transaction branch with voice data
+                              context.go(
+                                '/transaction?voiceAmount=$amount&voiceDesc=$desc&voiceCat=$cat',
+                              );
+                            }
+                          });
                         },
                       ),
                     ],

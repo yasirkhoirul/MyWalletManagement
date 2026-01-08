@@ -105,7 +105,7 @@ class MyRouter {
       ],
       redirect: (context, state) {
         final bool isLogin = authbloc.state is AuthSucces;
-        final unsecurepath = ['/', '/signup', '/forgetpassword'];
+        final unsecurepath = ['/', '/signup', '/forgetpassword', '/intro'];
         if (!isLogin && !unsecurepath.contains(state.fullPath)) {
           return '/';
         }
