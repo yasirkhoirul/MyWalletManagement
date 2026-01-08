@@ -174,41 +174,14 @@ class _OverviewPageState extends State<OverviewPage>
         },
         child: BlocListener<SyncBloc, SyncState>(
           listener: (context, state) {
+            // Sync status is now handled by the FAB-style indicator in MainScaffold
+            // Just log for debugging
             if (state is SyncSuccess) {
-              Logger().d(state.result.message);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.result.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              Logger().d('Sync success: ${state.result.message}');
             } else if (state is SyncError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.error),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              Logger().e('Sync error: ${state.error}');
             } else if (state is SyncInProgress) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(state.message),
-                    ],
-                  ),
-                  duration: const Duration(seconds: 30),
-                ),
-              );
+              Logger().d('Sync in progress: ${state.message}');
             }
           },
           child: Scaffold(

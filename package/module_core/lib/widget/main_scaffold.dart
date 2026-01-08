@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:module_core/service/network/network_service.dart';
+import 'package:module_core/service/notification/notification_service.dart';
 
-/// Sync status for display
+/// Sync status for display (kept for backwards compatibility)
 enum SyncStatus { idle, syncing, success, failed }
 
-class MainScaffold extends StatelessWidget {
+class MainScaffold extends StatefulWidget {
   final StatefulNavigationShell navigationShellState;
   final VoidCallback? onLogout;
   final Stream<SyncStatus>? syncStatusStream;
@@ -16,6 +17,32 @@ class MainScaffold extends StatelessWidget {
     this.syncStatusStream,
     super.key,
   });
+
+  @override
+  State<MainScaffold> createState() => _MainScaffoldState();
+}
+
+class _MainScaffoldState extends State<MainScaffold> {
+  @override
+  void initState() {
+    super.initState();
+    // Listen to sync status and forward to notification service
+    widget.syncStatusStream?.listen((status) {
+      switch (status) {
+        case SyncStatus.syncing:
+          NotificationService().showSyncing();
+          break;
+        case SyncStatus.success:
+          NotificationService().showSyncSuccess();
+          break;
+        case SyncStatus.failed:
+          NotificationService().showSyncError();
+          break;
+        case SyncStatus.idle:
+          break;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +102,7 @@ class MainScaffold extends StatelessWidget {
             IconButton(
               tooltip: 'Logout',
               icon: const Icon(Icons.logout, color: Colors.white70),
-              onPressed: onLogout,
+              onPressed: widget.onLogout,
             ),
           ],
         ),
@@ -99,7 +126,7 @@ class MainScaffold extends StatelessWidget {
           ),
           child: FloatingActionButton(
             onPressed: () {
-              navigationShellState.goBranch(1);
+              widget.navigationShellState.goBranch(1);
             },
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -119,51 +146,52 @@ class MainScaffold extends StatelessWidget {
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
                 label: 'Home',
-                isSelected: navigationShellState.currentIndex == 0,
-                onTap: () => navigationShellState.goBranch(0),
+                isSelected: widget.navigationShellState.currentIndex == 0,
+                onTap: () => widget.navigationShellState.goBranch(0),
               ),
               _buildNavItem(
                 icon: Icons.account_balance_wallet_outlined,
                 activeIcon: Icons.account_balance_wallet,
                 label: 'Riwayat',
-                isSelected: navigationShellState.currentIndex == 2,
-                onTap: () => navigationShellState.goBranch(2),
+                isSelected: widget.navigationShellState.currentIndex == 2,
+                onTap: () => widget.navigationShellState.goBranch(2),
               ),
               const SizedBox(width: 48),
               _buildNavItem(
                 icon: Icons.analytics_outlined,
                 activeIcon: Icons.analytics,
                 label: 'Analisis',
-                isSelected: navigationShellState.currentIndex == 3,
-                onTap: () => navigationShellState.goBranch(3),
+                isSelected: widget.navigationShellState.currentIndex == 3,
+                onTap: () => widget.navigationShellState.goBranch(3),
               ),
               _buildNavItem(
                 icon: Icons.build_circle_outlined,
                 activeIcon: Icons.build_circle_rounded,
                 label: 'Anggaran',
-                isSelected: navigationShellState.currentIndex == 4,
-                onTap: () => navigationShellState.goBranch(4),
+                isSelected: widget.navigationShellState.currentIndex == 4,
+                onTap: () => widget.navigationShellState.goBranch(4),
               ),
             ],
           ),
         ),
         body: Stack(
           children: [
-            SafeArea(child: navigationShellState),
-            // Sync indicator in bottom left
-            if (syncStatusStream != null)
-              Positioned(
-                left: 16,
-                bottom: 100,
-                child: StreamBuilder<SyncStatus>(
-                  stream: syncStatusStream,
-                  initialData: SyncStatus.idle,
-                  builder: (context, snapshot) {
-                    final status = snapshot.data ?? SyncStatus.idle;
-                    return _SyncIndicatorWidget(status: status);
-                  },
-                ),
+            SafeArea(child: widget.navigationShellState),
+            // Queued notification indicator in bottom left
+            Positioned(
+              left: 16,
+              bottom: 100,
+              child: StreamBuilder<ToastMessage?>(
+                stream: NotificationService().stream,
+                builder: (context, snapshot) {
+                  final message = snapshot.data;
+                  if (message == null) {
+                    return const SizedBox.shrink();
+                  }
+                  return _ToastWidget(message: message);
+                },
               ),
+            ),
           ],
         ),
       ),
@@ -210,48 +238,26 @@ class MainScaffold extends StatelessWidget {
   }
 }
 
-class _SyncIndicatorWidget extends StatefulWidget {
-  final SyncStatus status;
-  const _SyncIndicatorWidget({required this.status});
+class _ToastWidget extends StatelessWidget {
+  final ToastMessage message;
 
-  @override
-  State<_SyncIndicatorWidget> createState() => _SyncIndicatorWidgetState();
-}
-
-class _SyncIndicatorWidgetState extends State<_SyncIndicatorWidget> {
-  double _opacity = 1.0;
-
-  @override
-  void didUpdateWidget(covariant _SyncIndicatorWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.status == SyncStatus.success &&
-        oldWidget.status != SyncStatus.success) {
-      // Start fade out after success
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setState(() => _opacity = 0.0);
-      });
-    } else if (widget.status == SyncStatus.syncing) {
-      _opacity = 1.0;
-    }
-  }
+  const _ToastWidget({required this.message});
 
   @override
   Widget build(BuildContext context) {
-    if (widget.status == SyncStatus.idle) {
-      return const SizedBox.shrink();
-    }
-
-    return AnimatedOpacity(
-      opacity: widget.status == SyncStatus.success ? _opacity : 1.0,
-      duration: const Duration(milliseconds: 500),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 200),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(-20 * (1 - value), 0),
+          child: Opacity(opacity: value, child: child),
+        );
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: widget.status == SyncStatus.syncing
-              ? const Color(0xFF2D3250)
-              : widget.status == SyncStatus.success
-              ? Colors.green.shade700
-              : Colors.red.shade700,
+          color: _getBackgroundColor(),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -264,7 +270,7 @@ class _SyncIndicatorWidgetState extends State<_SyncIndicatorWidget> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.status == SyncStatus.syncing)
+            if (message.type == ToastType.syncing)
               const SizedBox(
                 width: 18,
                 height: 18,
@@ -274,20 +280,10 @@ class _SyncIndicatorWidgetState extends State<_SyncIndicatorWidget> {
                 ),
               )
             else
-              Icon(
-                widget.status == SyncStatus.success
-                    ? Icons.check_circle
-                    : Icons.error,
-                color: Colors.white,
-                size: 18,
-              ),
+              Icon(_getIcon(), color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Text(
-              widget.status == SyncStatus.syncing
-                  ? 'Syncing...'
-                  : widget.status == SyncStatus.success
-                  ? 'Synced!'
-                  : 'Sync Failed',
+              message.message,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
@@ -298,5 +294,31 @@ class _SyncIndicatorWidgetState extends State<_SyncIndicatorWidget> {
         ),
       ),
     );
+  }
+
+  Color _getBackgroundColor() {
+    switch (message.type) {
+      case ToastType.success:
+        return Colors.green.shade700;
+      case ToastType.error:
+        return Colors.red.shade700;
+      case ToastType.info:
+        return const Color(0xFF2D3250);
+      case ToastType.syncing:
+        return const Color(0xFF2D3250);
+    }
+  }
+
+  IconData _getIcon() {
+    switch (message.type) {
+      case ToastType.success:
+        return Icons.check_circle;
+      case ToastType.error:
+        return Icons.error;
+      case ToastType.info:
+        return Icons.info;
+      case ToastType.syncing:
+        return Icons.sync;
+    }
   }
 }

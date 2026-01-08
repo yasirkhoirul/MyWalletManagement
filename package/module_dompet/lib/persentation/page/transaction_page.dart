@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:module_core/constant/constant.dart';
+import 'package:module_core/service/notification/notification_service.dart';
 import 'package:module_dompet/data/datasource/voice_remote_datasource.dart';
 import 'package:module_dompet/domain/entities/transaction_entity.dart';
 import 'package:module_dompet/persentation/bloc/dompet_bloc.dart';
@@ -856,14 +857,10 @@ class _TransactionPageState extends State<TransactionPage>
                         child: BlocListener<TransactionBloc, TransactionState>(
                           listener: (context, state) {
                             if (state is TransactionSuccess) {
-                              if (mounted) {
-                                final messenger = ScaffoldMessenger.maybeOf(
-                                  context,
-                                );
-                                messenger?.showSnackBar(
-                                  SnackBar(content: Text(state.message)),
-                                );
-                              }
+                              // Use queued notification instead of snackbar
+                              NotificationService().showTransactionSuccess(
+                                state.message,
+                              );
                               _amountController.clear();
                               _descriptionController.clear();
                               setState(() {
@@ -871,17 +868,10 @@ class _TransactionPageState extends State<TransactionPage>
                                 _selectedCategory = null;
                               });
                             } else if (state is TransactionError) {
-                              if (mounted) {
-                                final messenger = ScaffoldMessenger.maybeOf(
-                                  context,
-                                );
-                                messenger?.showSnackBar(
-                                  SnackBar(
-                                    content: Text(state.message),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
+                              // Use queued notification instead of snackbar
+                              NotificationService().showTransactionError(
+                                state.message,
+                              );
                             }
                           },
                           child: ElevatedButton(

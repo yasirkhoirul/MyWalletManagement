@@ -114,7 +114,7 @@ class _AnalyzePageState extends State<AnalyzePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Warna lebih gelap = pengeluaran lebih tinggi',
+                      'Warna lebih oren = pengeluaran lebih tinggi',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade400,

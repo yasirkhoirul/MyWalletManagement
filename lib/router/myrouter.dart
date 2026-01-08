@@ -15,11 +15,16 @@ import 'package:module_dompet/data/datasource/sync_service.dart';
 import 'package:my_wallet_management/notifier/auth_listerner.dart';
 
 class MyRouter {
-  GoRouter getMyrouter(AuthBloc authbloc) {
+  GoRouter getMyrouter(AuthBloc authbloc, bool introCompleted) {
     return GoRouter(
       refreshListenable: AuthListerner(authbloc),
-      initialLocation: '/',
+      // Show intro only on first launch, otherwise go to login
+      initialLocation: introCompleted ? '/' : '/intro',
       routes: [
+        GoRoute(
+          path: '/intro',
+          builder: (context, state) => const IntroductionPage(),
+        ),
         GoRoute(path: '/', builder: (context, state) => LoginPage()),
         GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
         GoRoute(

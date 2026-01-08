@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:module_core/service/network/network_service.dart';
 import 'package:module_core/theme/theme.dart';
 import 'package:module_core/theme/util.dart';
@@ -18,6 +19,9 @@ import 'package:module_dompet/persentation/bloc/transaction_list_bloc.dart';
 import 'package:my_wallet_management/router/myrouter.dart';
 import 'injection.dart' as injector;
 
+// Store intro completion status globally
+bool _introCompleted = false;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -31,6 +35,10 @@ Future<void> main() async {
   );
 
   await injector.init();
+
+  // Check if intro has been completed
+  final prefs = await SharedPreferences.getInstance();
+  _introCompleted = prefs.getBool('intro_completed') ?? false;
 
   runApp(
     MultiBlocProvider(
@@ -46,13 +54,14 @@ Future<void> main() async {
         BlocProvider(create: (context) => injector.locator<BudgetBloc>()),
         BlocProvider(create: (context) => injector.locator<SyncBloc>()),
       ],
-      child: const MyApp(),
+      child: MyApp(introCompleted: _introCompleted),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool introCompleted;
+  const MyApp({super.key, required this.introCompleted});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -76,7 +85,7 @@ class _MyAppState extends State<MyApp> {
     final authBloc = context.read<AuthBloc>();
     return MaterialApp.router(
       theme: theme.dark(),
-      routerConfig: MyRouter().getMyrouter(authBloc),
+      routerConfig: MyRouter().getMyrouter(authBloc, widget.introCompleted),
     );
   }
 }
