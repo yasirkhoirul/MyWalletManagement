@@ -26,6 +26,22 @@ Foto struk belanja Anda dan AI akan membaca serta mencatat transaksi secara otom
 - Sinkronisasi otomatis saat online
 - Akses dari perangkat manapun
 
+## 📱 Screenshots
+
+<p align="center">
+  <img src="assets/screenshoot/IMG_20260108_203833.jpg" width="18%" />
+  <img src="assets/screenshoot/IMG_20260108_204003.jpg" width="18%" />
+  <img src="assets/screenshoot/IMG_20260108_204105.jpg" width="18%" />
+  <img src="assets/screenshoot/IMG_20260108_204124.jpg" width="18%" />
+  <img src="assets/screenshoot/IMG_20260108_204124(1).jpg" width="18%" />
+</p>
+
+### 📸 Scan Struk (OCR Demo)
+
+<p align="center">
+  <img src="assets/screenshoot/ocr.gif" width="30%" />
+</p>
+
 ## 🏗️ Arsitektur
 
 ```
