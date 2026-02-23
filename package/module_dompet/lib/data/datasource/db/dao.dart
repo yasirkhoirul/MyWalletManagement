@@ -611,8 +611,34 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Insert or update a budget limit
+  /// Manual upsert karena Drift tidak bisa mendeteksi UNIQUE constraint
+  /// yang dibuat via raw SQL migration (customStatement).
+  /// Constraint: UNIQUE(dompet_id, category, month, year)
   Future<int> insertOrUpdateBudgetLimit(BudgetLimitsCompanion limit) async {
-    return into(budgetLimits).insertOnConflictUpdate(limit);
+    // Cek apakah sudah ada record dengan kombinasi yang sama
+    final existing =
+        await (select(budgetLimits)
+              ..where((b) => b.dompetId.equals(limit.dompetId.value))
+              ..where((b) => b.category.equals(limit.category.value.index))
+              ..where((b) => b.month.equals(limit.month.value))
+              ..where((b) => b.year.equals(limit.year.value)))
+            .getSingleOrNull();
+
+    if (existing != null) {
+      // Update record yang sudah ada
+      await (update(
+        budgetLimits,
+      )..where((b) => b.id.equals(existing.id))).write(
+        BudgetLimitsCompanion(
+          limitAmount: limit.limitAmount,
+          isNotified: const Value(false), // Reset notifikasi saat di-edit
+        ),
+      );
+      return existing.id;
+    } else {
+      // Insert record baru
+      return into(budgetLimits).insert(limit);
+    }
   }
 
   /// Delete a budget limit
