@@ -36,7 +36,7 @@ Foto struk belanja Anda dan AI akan membaca serta mencatat transaksi secara otom
   <img src="assets/screenshoot/IMG_20260108_204124(1).jpg" width="18%" />
 </p>
 
-### 📸 Scan Struk (OCR Demo)
+### 📸 Input Suara (Demo)
 
 <p align="center">
   <img src="assets/screenshoot/ocr.gif" width="30%" />
