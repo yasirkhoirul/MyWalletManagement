@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:module_core/service/network/network_service.dart';
+import 'package:module_core/service/transaction_form_notifier.dart';
 import 'package:module_auth/data/auth_repository_impl.dart';
 import 'package:module_auth/data/datasource/auth_remote_data.dart';
 import 'package:module_auth/domain/repository/auth_repository.dart';
@@ -47,6 +48,9 @@ final GetIt locator = GetIt.instance;
 Future<void> init() async {
   // Register core services
   locator.registerLazySingleton<NetworkService>(() => NetworkService());
+  locator.registerLazySingleton<TransactionFormNotifier>(
+    () => TransactionFormNotifier(),
+  );
   // Firebase: register first so other dependents can use it
   locator.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 

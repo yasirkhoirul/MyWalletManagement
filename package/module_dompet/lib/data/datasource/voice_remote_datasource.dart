@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:firebase_vertexai/firebase_vertexai.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:module_core/constant/constant.dart';
 import 'package:module_dompet/data/model/receipt_result_model.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -22,8 +22,8 @@ class VoiceRemoteDataSourceImpl implements VoiceRemoteDataSource {
   late final GenerativeModel _model;
 
   VoiceRemoteDataSourceImpl() {
-    _model = FirebaseVertexAI.instance.generativeModel(
-      model: 'gemini-2.0-flash',
+    _model = FirebaseAI.vertexAI().generativeModel(
+      model: 'gemini-2.5-flash',
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
   }

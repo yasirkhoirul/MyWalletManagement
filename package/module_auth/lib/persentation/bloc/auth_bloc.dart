@@ -54,11 +54,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> onLogin(AuthOnLogin event, Emitter<AuthState> emit)async{
-    
     emit(AuthLoading());
     try {
-      final response = await postLogin.execute(event.data);
-      emit(AuthSucces(response));
+      await postLogin.execute(event.data);
+      // authStateChanges fires BEFORE signInWithEmailAndPassword future resolves.
+      // onCheck runs concurrently and emits AuthSucces → router navigates away.
+      // Emitting AuthSucces here races with onCheck and leaves the emitter dangling.
+      // Let authStateChanges → onCheck be the sole authority for AuthSucces.
     } catch (e) {
       emit(AuthFailed(e.toString()));
     }
@@ -67,8 +69,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> onLogout(AuthOnLogout event, Emitter<AuthState> emit)async{
     emit(AuthLoading());
     try {
-      await postLogout.execute();   
-      emit(AuthInitial());
+      await postLogout.execute();
+      // authStateChanges emits null after signOut → onCheck emits AuthInitial.
     } catch (e) {
       emit(AuthFailed(e.toString()));
     }
@@ -77,7 +79,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       await postSignup.execute(event.data);
-      add(AuthOnLogin(event.data));
+      // createUserWithEmailAndPassword auto-signs the user in.
+      // authStateChanges → onCheck handles the AuthSucces transition.
     } catch (e) {
       emit(AuthFailed(e.toString()));
     }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:module_core/service/network/network_service.dart';
 import 'package:module_core/service/notification/notification_service.dart';
+import 'package:module_core/service/transaction_form_notifier.dart';
 
 /// Sync status for display (kept for backwards compatibility)
 enum SyncStatus { idle, syncing, success, failed }
@@ -23,9 +25,12 @@ class MainScaffold extends StatefulWidget {
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
+  late final TransactionFormNotifier _formNotifier;
+
   @override
   void initState() {
     super.initState();
+    _formNotifier = GetIt.I<TransactionFormNotifier>();
     // Listen to sync status and forward to notification service
     widget.syncStatusStream?.listen((status) {
       switch (status) {
@@ -44,8 +49,63 @@ class _MainScaffoldState extends State<MainScaffold> {
     });
   }
 
+  /// Check if user is on transaction page and has unsaved data before switching tab
+  Future<bool> _canLeaveTransaction() async {
+    final isOnTransaction = widget.navigationShellState.currentIndex == 1;
+    if (!isOnTransaction || !_formNotifier.hasUnsavedChanges) return true;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 28),
+            SizedBox(width: 8),
+            Text(
+              'Data Belum Disimpan',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Anda memiliki data transaksi yang belum disimpan. Yakin ingin pindah halaman?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Tetap di Halaman',
+              style: TextStyle(color: Colors.amber),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(
+              'Pindah',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  void _goToBranch(int index) async {
+    if (widget.navigationShellState.currentIndex == index) return;
+    final canLeave = await _canLeaveTransaction();
+    if (canLeave) {
+      widget.navigationShellState.goBranch(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isOnTransaction = widget.navigationShellState.currentIndex == 1;
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -106,32 +166,67 @@ class _MainScaffoldState extends State<MainScaffold> {
             ),
           ],
         ),
-        floatingActionButton: Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF6C63FF), Color(0xFF4A90E2)],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6C63FF).withValues(alpha: 0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: FloatingActionButton(
-            onPressed: () {
-              widget.navigationShellState.goBranch(1);
-            },
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: const Icon(Icons.add, size: 28, color: Colors.white),
-          ),
+        floatingActionButton: ListenableBuilder(
+          listenable: _formNotifier,
+          builder: (context, _) {
+            if (isOnTransaction) {
+              // Save button on transaction page
+              return Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFA726), Color(0xFFFF9800)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FloatingActionButton(
+                  onPressed: () => _formNotifier.triggerSave(),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: const Icon(Icons.save, size: 28, color: Colors.white),
+                ),
+              );
+            } else {
+              // Add button on other pages
+              return Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF6C63FF), Color(0xFF4A90E2)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6C63FF).withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    widget.navigationShellState.goBranch(1);
+                  },
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: const Icon(Icons.add, size: 28, color: Colors.white),
+                ),
+              );
+            }
+          },
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: BottomAppBar(
@@ -147,14 +242,14 @@ class _MainScaffoldState extends State<MainScaffold> {
                 activeIcon: Icons.home,
                 label: 'Home',
                 isSelected: widget.navigationShellState.currentIndex == 0,
-                onTap: () => widget.navigationShellState.goBranch(0),
+                onTap: () => _goToBranch(0),
               ),
               _buildNavItem(
                 icon: Icons.account_balance_wallet_outlined,
                 activeIcon: Icons.account_balance_wallet,
                 label: 'Riwayat',
                 isSelected: widget.navigationShellState.currentIndex == 2,
-                onTap: () => widget.navigationShellState.goBranch(2),
+                onTap: () => _goToBranch(2),
               ),
               const SizedBox(width: 48),
               _buildNavItem(
@@ -162,14 +257,14 @@ class _MainScaffoldState extends State<MainScaffold> {
                 activeIcon: Icons.analytics,
                 label: 'Analisis',
                 isSelected: widget.navigationShellState.currentIndex == 3,
-                onTap: () => widget.navigationShellState.goBranch(3),
+                onTap: () => _goToBranch(3),
               ),
               _buildNavItem(
                 icon: Icons.build_circle_outlined,
                 activeIcon: Icons.build_circle_rounded,
                 label: 'Anggaran',
                 isSelected: widget.navigationShellState.currentIndex == 4,
-                onTap: () => widget.navigationShellState.goBranch(4),
+                onTap: () => _goToBranch(4),
               ),
             ],
           ),

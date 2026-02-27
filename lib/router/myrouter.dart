@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
+import 'package:logger/web.dart';
 import 'package:module_auth/module_auth.dart';
 import 'package:module_auth/persentation/bloc/auth_bloc.dart';
 import 'package:module_core/widget/main_scaffold.dart';
@@ -104,6 +105,7 @@ class MyRouter {
         ),
       ],
       redirect: (context, state) {
+        Logger().i("Redirect check: ${state.fullPath}, Auth state: ${authbloc.state}");
         final bool isLogin = authbloc.state is AuthSucces;
         final unsecurepath = ['/', '/signup', '/forgetpassword', '/intro'];
         if (!isLogin && !unsecurepath.contains(state.fullPath)) {

@@ -21,7 +21,7 @@ class ReceiptRemoteDataSourceImpl implements ReceiptRemoteDataSource {
 
   ReceiptRemoteDataSourceImpl() {
     _model = FirebaseAI.vertexAI().generativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
   }

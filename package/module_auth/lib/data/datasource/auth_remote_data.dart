@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 import 'package:module_auth/data/model/usermodel.dart';
 import 'package:module_core/module_core.dart';
 
@@ -18,12 +19,16 @@ class AuthRemoteDataImpl implements AuthRemoteData{
   @override
   Future<String> onLogin(UserModel data) async {
     try {
+      Logger().i("Attempting login for email: ${data.email}");
       final response = await firebaseAuth.signInWithEmailAndPassword(email: data.email, password: data.password);
+      Logger().i("FirebaseAuth response: ${response.user}");
       if(response.user == null){
         throw CustomFirebaseException("error akun tidak ditemukan");
       }
+      Logger().i("Login sukses: ${response.user!.email}");
       return response.user!.email!;
     } catch (e){
+      Logger().e("Login error: $e");
       throw CustomFirebaseException(e);
     }
   }
